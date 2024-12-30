@@ -13,8 +13,8 @@ BreakBeforeBraces: Allman
 NamespaceIndentation: All
 IndentCaseLabels: true
 IndentPPDirectives: BeforeHash
-BinPackArguments: true
-BinPackParameters: true
+BinPackArguments: false
+BinPackParameters: false
 PackConstructorInitializers: NextLine
 AlignArrayOfStructures: Left
 AllowShortBlocksOnASingleLine: Empty
