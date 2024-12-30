@@ -53,10 +53,6 @@ Alpha Test and Blending:
 
 We are *required* to define at least a vertex and fragment shader of our own in OpenGL. No defaults here.
 
-VBO: Vertex Buffer Object
-* Manages the memory for vertex data
-* we use this to try to send as much data up to the GPU at once as possible
-
 glBufferData function:
 * GL_STREAM_DRAW: the data is set only once and used by the GPU at most a few times.
 * GL_STATIC_DRAW: the data is set only once and used many times.
@@ -67,15 +63,38 @@ Vertex Stride:
 
 ## THE PROCESS
 ```c++
-// This is the process for drawing an object in OpenGL
-// 0. copy our vertices array in a buffer for OpenGL to use
+// ..:: Initialization code :: ..
+// 1. bind Vertex Array Object
+glBindVertexArray(VAO);
+// 2. copy our vertices array in a vertex buffer for OpenGL to use
 glBindBuffer(GL_ARRAY_BUFFER, VBO);
 glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-// 1. then set the vertex attributes pointers
+// 3. copy our index array in a element buffer for OpenGL to use
+glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+// 4. then set the vertex attributes pointers
 glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 glEnableVertexAttribArray(0);  
-// 2. use our shader program when we want to render an object
+
+[...]
+  
+// ..:: Drawing code (in render loop) :: ..
 glUseProgram(shaderProgram);
-// 3. now draw the object 
-someOpenGLFunctionThatDrawsOurTriangle();   
+glBindVertexArray(VAO);
+glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+glBindVertexArray(0);
 ```
+
+VBO: Vertex Buffer Object
+* Manages the memory for vertex data
+* we use this to try to send as much data up to the GPU at once as possible
+
+VAO: Vertex Array Object
+* stores vertex attribute calls
+* makes drawing objects multiple times easy, just bind the corresponding VAO
+
+EBO: Element Buffer Object
+* Binds indices to the VBO
+
+## Indices
+These specify the index order of each triangle you would like to draw in the vertex array.
