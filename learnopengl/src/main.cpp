@@ -16,12 +16,15 @@ void FrameBufferSizeCallback(GLFWwindow *window, int width, int height);
 const unsigned int WINDOW_WIDTH = 800;
 const unsigned int WINDOW_HEIGHT = 600;
 
-const char *vertexShaderPath = "shaders/6.3.coordinate_systems.vs";
-const char *fragmentShaderPath = "shaders/6.3.coordinate_systems.fs";
+const char *vertexShaderPath = "shaders/7.1.camera.vs";
+const char *fragmentShaderPath = "shaders/7.1.camera.fs";
 const char *texturePathContainer = "textures/container.jpg";
-const char *texturePathFace = "textures/awesomeface.png";
+const char *texturePathFace = "textures/mouse.png";
 
-float mixValue = 0.2f;
+const float CAMERA_SPEED = 0.05f;
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
 int main()
 {
@@ -225,6 +228,7 @@ int main()
         // glBindVertexArray(0); // no need to unbind it every time
         shader.Use();
 
+        // model matrix
         for (unsigned int i = 0; i < 10; i++)
         {
             glm::mat4 model = glm::mat4(1.0f);
@@ -241,11 +245,22 @@ int main()
             glDrawArrays(GL_TRIANGLES, 0, 36);
         }
 
-        // create transformations
+        // view matrix (camera)
+        glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+        glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
+        glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+        glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
+        glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
+
         glm::mat4 view = glm::mat4(1.0f);
+        const float radius = 10.0f;
+        float camX = sin(glfwGetTime()) * radius;
+        float camZ = cos(glfwGetTime()) * radius;
+        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+
+        // projection matrix
         glm::mat4 projection = glm::mat4(1.0f);
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f)); // "camera" position!
-        projection = glm::perspective(glm::radians(80.0f),
+        projection = glm::perspective(glm::radians(45.0f),
                                       (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT,
                                       0.1f,
                                       100.0f);
@@ -253,7 +268,6 @@ int main()
         // set uniforms
         shader.SetMatrix4x4("view", view);
         shader.SetMatrix4x4("projection", projection);
-        shader.SetFloat("mixValue", mixValue);
 
         // Swaps the 2d buffer that contains color values for each pixel
         glfwSwapBuffers(window);
@@ -276,13 +290,22 @@ void ProcessInput(GLFWwindow *window)
     {
         glfwSetWindowShouldClose(window, true);
     }
-    else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
-        mixValue = mixValue >= 1.0f ? 1.0f : mixValue + 0.001f;
+        cameraPos += CAMERA_SPEED * cameraFront;
     }
-    else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
     {
-        mixValue = mixValue <= 0.0f ? 0.0f : mixValue - 0.001f;
+        cameraPos -= CAMERA_SPEED * cameraFront;
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    {
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * CAMERA_SPEED;
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    {
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * CAMERA_SPEED;
     }
 }
 
