@@ -21,10 +21,13 @@ const char *fragmentShaderPath = "shaders/7.1.camera.fs";
 const char *texturePathContainer = "textures/container.jpg";
 const char *texturePathFace = "textures/mouse.png";
 
-const float CAMERA_SPEED = 0.05f;
+const float CAMERA_SPEED = 2.5f;
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+float deltaTime = 0.0f; // Time between current frame and last frame
+float lastFrameTime = 0.0f; // Time of last frame
 
 int main()
 {
@@ -211,6 +214,11 @@ int main()
     // Main Loop
     while (!glfwWindowShouldClose(window))
     {
+        // Time
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrameTime;
+        lastFrameTime = currentFrame;
+
         // Input Handling
         ProcessInput(window);
 
@@ -291,21 +299,23 @@ void ProcessInput(GLFWwindow *window)
         glfwSetWindowShouldClose(window, true);
     }
 
+    float finalCameraSpeed = CAMERA_SPEED * deltaTime;
+
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
-        cameraPos += CAMERA_SPEED * cameraFront;
+        cameraPos += finalCameraSpeed * cameraFront;
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
     {
-        cameraPos -= CAMERA_SPEED * cameraFront;
+        cameraPos -= finalCameraSpeed * cameraFront;
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * CAMERA_SPEED;
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * finalCameraSpeed;
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * CAMERA_SPEED;
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * finalCameraSpeed;
     }
 }
 
