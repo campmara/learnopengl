@@ -95,6 +95,7 @@
     <ClCompile Include="src\stb_image_implementation.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\camera.h" />
     <ClInclude Include="include\shader.h" />
     <ClInclude Include="lib\stb_image.h" />
   </ItemGroup>

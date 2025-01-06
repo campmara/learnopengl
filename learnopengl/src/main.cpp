@@ -7,10 +7,13 @@
 #include <iostream>
 
 #include <shader.h>
+#include <camera.h>
 
 // Function declerations
 void ProcessInput(GLFWwindow *window);
 void FrameBufferSizeCallback(GLFWwindow *window, int width, int height);
+void MouseCallback(GLFWwindow *window, double xPosIn, double yPosIn);
+void ScrollCallback(GLFWwindow *window, double xOffset, double yOffset);
 
 // Settings
 const unsigned int WINDOW_WIDTH = 800;
@@ -21,11 +24,13 @@ const char *fragmentShaderPath = "shaders/7.1.camera.fs";
 const char *texturePathContainer = "textures/container.jpg";
 const char *texturePathFace = "textures/mouse.png";
 
-const float CAMERA_SPEED = 2.5f;
-glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
-glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+// Camera
+Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+bool isFirstMouseInput = true;
+float lastMouseX = (float)WINDOW_WIDTH / 2.0f;
+float lastMouseY = (float)WINDOW_HEIGHT / 2.0f;
 
+// Timing
 float deltaTime = 0.0f; // Time between current frame and last frame
 float lastFrameTime = 0.0f; // Time of last frame
 
@@ -46,8 +51,14 @@ int main()
         return -1;
     }
     glfwMakeContextCurrent(window);
-    // Framebuffer size callback for resizing
+
+    // Set callback functions
     glfwSetFramebufferSizeCallback(window, FrameBufferSizeCallback);
+    glfwSetCursorPosCallback(window, MouseCallback);
+    glfwSetScrollCallback(window, ScrollCallback);
+
+    // Tell the window to disable the cursor
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Load GLAD before using OpenGL functions
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
@@ -254,21 +265,11 @@ int main()
         }
 
         // view matrix (camera)
-        glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-        glm::vec3 cameraDirection = glm::normalize(cameraPos - cameraTarget);
-        glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-        glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
-        glm::vec3 cameraUp = glm::cross(cameraDirection, cameraRight);
-
-        glm::mat4 view = glm::mat4(1.0f);
-        const float radius = 10.0f;
-        float camX = sin(glfwGetTime()) * radius;
-        float camZ = cos(glfwGetTime()) * radius;
-        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+        glm::mat4 view = camera.GetViewMatrix();
 
         // projection matrix
         glm::mat4 projection = glm::mat4(1.0f);
-        projection = glm::perspective(glm::radians(45.0f),
+        projection = glm::perspective(glm::radians(camera.Zoom),
                                       (float)WINDOW_WIDTH / (float)WINDOW_HEIGHT,
                                       0.1f,
                                       100.0f);
@@ -299,30 +300,59 @@ void ProcessInput(GLFWwindow *window)
         glfwSetWindowShouldClose(window, true);
     }
 
-    float finalCameraSpeed = CAMERA_SPEED * deltaTime;
-
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {
-        cameraPos += finalCameraSpeed * cameraFront;
+        camera.ProcessKeyboard(FORWARD, deltaTime);
     }
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
     {
-        cameraPos -= finalCameraSpeed * cameraFront;
+        camera.ProcessKeyboard(BACKWARD, deltaTime);
     }
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
     {
-        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * finalCameraSpeed;
+        camera.ProcessKeyboard(LEFT, deltaTime);
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
     {
-        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * finalCameraSpeed;
+        camera.ProcessKeyboard(RIGHT, deltaTime);
     }
 }
 
 /// <summary>
-/// Called whenever the window size is changed
+/// Called whenever the window size is changed.
 /// </summary>
 void FrameBufferSizeCallback(GLFWwindow *window, int width, int height)
 {
     glViewport(0, 0, width, height);
+}
+
+/// <summary>
+/// Called whenever the mouse moves in the window.
+/// </summary>
+void MouseCallback(GLFWwindow* window, double xPosIn, double yPosIn)
+{
+    float xPos = static_cast<float>(xPosIn);
+    float yPos = static_cast<float>(yPosIn);
+
+    if (isFirstMouseInput)
+    {
+        lastMouseX = xPos;
+        lastMouseY = yPos;
+        isFirstMouseInput = false;
+    }
+
+    float xOffset = (float)xPos - lastMouseX;
+    float yOffset = lastMouseY - (float)yPos;
+    lastMouseX = (float)xPos;
+    lastMouseY = (float)yPos;
+
+    camera.ProcessMouseMovement(xOffset, yOffset);
+}
+
+/// <summary>
+/// Called whenever scrolling input is received from the mouse.
+/// </summary>
+void ScrollCallback(GLFWwindow* window, double xOffset, double yOffset)
+{
+    camera.ProcessMouseScroll(static_cast<float>(yOffset));
 }
