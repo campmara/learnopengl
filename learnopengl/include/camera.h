@@ -39,7 +39,7 @@ public:
     // camera options
     float MovementSpeed;
     float MouseSensitivity;
-    float Zoom;
+    float FoV;
 
     // constructor with vectors
     Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f),
@@ -49,7 +49,7 @@ public:
         : Front(glm::vec3(0.0f, 0.0f, -1.0f)),
           MovementSpeed(CAM_DEFAULT_SPEED),
           MouseSensitivity(CAM_DEFAULT_SENSITIVITY),
-          Zoom(CAM_DEFAULT_ZOOM)
+          FoV(CAM_DEFAULT_ZOOM)
     {
         Position = position;
         WorldUp = up;
@@ -63,7 +63,7 @@ public:
         : Front(glm::vec3(0.0f, 0.0f, -1.0f)),
           MovementSpeed(CAM_DEFAULT_SPEED),
           MouseSensitivity(CAM_DEFAULT_SENSITIVITY),
-          Zoom(CAM_DEFAULT_ZOOM)
+          FoV(CAM_DEFAULT_ZOOM)
     {
         Position = glm::vec3(posX, posY, posZ);
         WorldUp = glm::vec3(upX, upY, upZ);
@@ -160,14 +160,14 @@ public:
     // wheel-axis
     void ProcessMouseScroll(float yOffset)
     {
-        Zoom -= (float)yOffset;
-        if (Zoom < 1.0f)
+        FoV -= (float)yOffset;
+        if (FoV < 1.0f)
         {
-            Zoom = 1.0f;
+            FoV = 1.0f;
         }
-        if (Zoom > 45.0f)
+        if (FoV > 45.0f)
         {
-            Zoom = 45.0f;
+            FoV = 45.0f;
         }
     }
 
