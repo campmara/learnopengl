@@ -5,4 +5,3 @@ Color is usually perceived in real life as a reflection of light on an object fr
 In graphics, color works similarly. The resulting color of an object is usually calculated as a component-wise multiplication of the color of the light and the color of the object, represented as a 3d vector.
 
 > perceived color = light color * object color
-
