@@ -72,8 +72,8 @@ int main()
     glEnable(GL_DEPTH_TEST);
 
     // Build and compile the shader program
-    Shader lightingShader("shaders/2.2.1.gouraud.vs", "shaders/2.2.1.gouraud.fs");
-    Shader lightCubeShader("shaders/2.1.1.light_cube.vs", "shaders/2.1.1.light_cube.fs");
+    Shader lightingShader("shaders/2.3.1.materials.vs", "shaders/2.3.1.materials.fs");
+    Shader lightCubeShader("shaders/2.3.1.light_cube.vs", "shaders/2.3.1.light_cube.fs");
 
     // Set up vertex data
 
@@ -260,9 +260,25 @@ int main()
 
         // be sure to activate shader when setting uniforms / drawing objects
         lightingShader.Use();
-        lightingShader.SetVec3("objectColor", 1.0f, 0.5f, 0.31f);
-        lightingShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
-        lightingShader.SetVec3("lightPos", lightPos);
+        lightingShader.SetVec3("light.position", lightPos);
+        lightingShader.SetVec3("viewPos", camera.Position);
+
+        // light properties
+        /*glm::vec3 lightColor;
+        lightColor.x = static_cast<float>(sin(glfwGetTime() * 2.0));
+        lightColor.y = static_cast<float>(sin(glfwGetTime() * 0.7));
+        lightColor.z = static_cast<float>(sin(glfwGetTime() * 1.3));*/
+        //glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f);   // decrease the influence
+        //glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f); // low influence
+        lightingShader.SetVec3("light.ambient", 1.0f, 1.0f, 1.0f);
+        lightingShader.SetVec3("light.diffuse", 1.0f, 1.0f, 1.0f);
+        lightingShader.SetVec3("light.specular", 1.0f, 1.0f, 1.0f);
+
+        // material properties
+        lightingShader.SetVec3("material.ambient", 0.0f, 0.1f, 0.06f);
+        lightingShader.SetVec3("material.diffuse", 0.0f, 0.50980392f, 0.50980392f);
+        lightingShader.SetVec3("material.specular", 0.50196078f, 0.50196078f, 0.50196078f);
+        lightingShader.SetFloat("material.shininess", 32.0f);
 
         // view / projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(camera.FoV),
@@ -283,6 +299,7 @@ int main()
 
         // also draw the lamp object
         lightCubeShader.Use();
+        lightCubeShader.SetVec3("lightColor", 1.0f, 1.0f, 1.0f);
         lightCubeShader.SetMat4x4("projection", projection);
         lightCubeShader.SetMat4x4("view", view);
         model = glm::mat4(1.0f);
