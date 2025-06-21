@@ -44,5 +44,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\3.3.shader.fs" />
+    <None Include="notes\020_stenciltesting.md" />
   </ItemGroup>
 </Project>

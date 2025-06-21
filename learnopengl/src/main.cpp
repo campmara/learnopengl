@@ -69,7 +69,10 @@ int main()
 
     // Configure global OpenGL state
     glEnable(GL_DEPTH_TEST);
-    //glDepthFunc(GL_ALWAYS);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
     // Build and compile the shader program
     Shader shader("shaders/3.1.1.depth_testing.vs", "shaders/3.1.1.depth_testing.fs");
